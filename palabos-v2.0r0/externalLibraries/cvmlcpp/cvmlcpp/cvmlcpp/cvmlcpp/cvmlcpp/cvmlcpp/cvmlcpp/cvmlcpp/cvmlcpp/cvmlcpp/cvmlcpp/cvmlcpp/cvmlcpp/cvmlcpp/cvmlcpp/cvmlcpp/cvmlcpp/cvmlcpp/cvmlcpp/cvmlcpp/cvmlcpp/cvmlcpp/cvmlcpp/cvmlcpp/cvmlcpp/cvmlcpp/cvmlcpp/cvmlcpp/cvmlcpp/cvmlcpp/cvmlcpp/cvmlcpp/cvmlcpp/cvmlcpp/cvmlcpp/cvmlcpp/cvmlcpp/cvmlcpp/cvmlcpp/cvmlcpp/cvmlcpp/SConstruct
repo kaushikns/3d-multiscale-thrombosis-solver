@@ -1,0 +1,35 @@
+env    = SConscript('build/SConscript')
+
+# Receive from Makefile: version info
+APIVERSION = ARGUMENTS.get('APIVERSION', '1')
+LIBVERSION = ARGUMENTS.get('LIBVERSION', '1')
+
+TARGET = ARGUMENTS.get('TARGET', '/usr/local')
+
+# Install Directories
+TARGETBIN   = TARGET + '/bin'
+TARGETLIB   = TARGET + '/lib'
+TARGETINC   = TARGET + '/include/cvmlcpp'
+TARGETDOC   = TARGET + '/share/doc/cvmlcpp'
+TARGETBLD   = TARGET + '/share/cvmlcpp'
+TARGETOMPTL = TARGET + '/include'
+
+SRC    = ['cvmlcpp/array', 'cvmlcpp/base', 'cvmlcpp/math', 'cvmlcpp/signal', 'cvmlcpp/volume']
+LIBSRC = ['cvmlcpp/base/Storage.cc', 'cvmlcpp/volume/SurfaceExtractor.cc']
+
+env.Replace(SHLIBSUFFIX = '.so.'+APIVERSION+'.'+LIBVERSION)
+
+staticCVMLCPP = env.StaticLibrary( 'cvmlcpp', LIBSRC )
+sharedCVMLCPP = env.SharedLibrary( 'cvmlcpp', LIBSRC, APIVERSION=APIVERSION, LIBVERSION=LIBVERSION )
+
+progs_voxelize = env.Program( 'bin/voxelize', 'progs/voxelize.cc')
+progs_fix_stl  = env.Program( 'bin/fix-stl', 'progs/fix-stl.cc', LIBS='cvmlcpp', LIBPATH='.')
+
+env.Install( TARGETBIN, [progs_voxelize, progs_fix_stl])
+env.Install( TARGETDOC, 'doc' )
+env.Install( TARGETINC, SRC )
+env.Install( TARGETOMPTL, 'omptl' )
+env.Install( TARGETLIB, [staticCVMLCPP, sharedCVMLCPP] )
+env.Install( TARGETBLD, 'build' )
+
+env.Alias('install', [TARGETBIN, TARGETDOC, TARGETINC, TARGETLIB, TARGETBLD, TARGETOMPTL])

@@ -1,0 +1,21 @@
+-include $(GENERAL_RULES)/mplibType
+
+EXE_INC = $(PFLAGS) $(PINC) \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/dynamicFvMesh/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
+    -I$(LIB_SRC)/Pstream/mpi/lnInclude \
+    -I/home/kaushik/mui \
+    -I/home/kaushik/mui/chrono_samplers \
+    -I/home/kaushik/mui/spatial_samplers \
+
+EXE_LIBS = \
+    -lfiniteVolume \
+    -ldynamicFvMesh \
+    -ltopoChangerFvMesh \
+    -lfvOptions \
+    -lmeshTools \
+    -lsampling \
+    $(PLIBS)
