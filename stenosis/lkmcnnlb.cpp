@@ -2999,7 +2999,7 @@ T computePltShear(list<platelet>::iterator current)
         }
     }
 
-    return maxShear / dt;
+    return (sqrt(2.) * maxShear / dt);
 }
 
 /// Write the full velocity and the velocity-norm into a VTK file.
