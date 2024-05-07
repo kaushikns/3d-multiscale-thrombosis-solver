@@ -1,0 +1,17 @@
+waveModels/waveModel/waveModel.C
+waveModels/waveModel/newWaveModel.C
+waveModels/Airy/Airy.C
+waveModels/Stokes2/Stokes2.C
+waveModels/Stokes5/Stokes5.C
+waveModels/solitary/solitary.C
+
+waveSuperpositions/waveSuperposition/waveSuperposition.C
+waveSuperpositions/waveSuperposition/newWaveSuperposition.C
+waveSuperpositions/waveAtmBoundaryLayerSuperposition/waveAtmBoundaryLayerSuperposition.C
+
+derivedFvPatchFields/waveAlpha/waveAlphaFvPatchScalarField.C
+derivedFvPatchFields/waveInletOutlet/waveInletOutletFvPatchFields.C
+derivedFvPatchFields/wavePressure/wavePressureFvPatchScalarField.C
+derivedFvPatchFields/waveVelocity/waveVelocityFvPatchVectorField.C
+
+LIB = $(FOAM_LIBBIN)/libwaves
