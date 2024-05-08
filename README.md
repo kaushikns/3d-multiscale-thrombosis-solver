@@ -21,7 +21,7 @@ An example meshed stenotic geometry is provided in the `case` directory.
 The geometries directory contains stl files of some geometries that can be utilized for simulations. Each geometry must be appropriately meshed, e.g., using `snappyHexMesh`, and the `case` directory needs to be updated accordingly. Additionally, the stl file input is also needed in the `param.xml` file. 
 
 #### Usage
-To run, `cd` to `case` and run:
+To run the example, `cd` to `case` and run:
 ````mpirun -np n1 pkmcnn-palabos-openfoam/pkmcnnlb : -np n2 agonistTransportDyMFoam #-parallel ````
 
 #### Output 
