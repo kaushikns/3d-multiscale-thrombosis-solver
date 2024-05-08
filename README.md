@@ -7,8 +7,8 @@ Thrombus growth model decribed in the publications:
 
 #### Code
 The framework includes two main programs, each residing in their respective directories along with their makefiles, located in 
-(i) `pkmcnn-palabos-openfoam/pkmcnnlb`, this program can be compiled using make and is designed to be run with MPI MPMD syntax.
-(ii) `pkmcnn-palabos-openfoam/pkmcnnlb/fvm/agonistTransportDyMFoam`, this program should be compiled using wmake and is also intended for execution with MPI MPMD syntax.
+(i) `pkmcnn-palabos-openfoam/pkmcnnlb`, this program can be compiled using make and is designed to be run using MPI MPMD launch mode.
+(ii) `pkmcnn-palabos-openfoam/pkmcnnlb/fvm/agonistTransportDyMFoam`, this program should be compiled using wmake and is also intended for execution using MPI MPMD launch mode.
 
 #### Prerequisites
 Before compiling and running the programs, ensure the following prerequisites are met:
