@@ -614,8 +614,6 @@ void updateEventList();
 // Also frees up heap memory associated with STL allocation
 void removeExitPlatelets();
 
-void removeUnboundPlatelets();
-
 // Used to initalize the LKMC lattice with given initial platelet distribution
 void iniKMCLattice();
 
@@ -1010,7 +1008,6 @@ int main(int argc, char *argv[])
 
         if (totalTime >= iter * dtLB && iter != floor(360. / dtLB))
         {
-            removeUnboundPlatelets();
             removeExitPlatelets();
 
             pcout << "Occupation size: " << occupation.size() << endl;
@@ -3517,133 +3514,6 @@ void removeExitPlatelets()
     }
 
     plateletList.swap(tempPlateletList);
-}
-
-void removeUnboundPlatelets()
-{
-    int unboundSize = unboundLocationsLocal.size();
-    int totalSize;
-
-    MPI_Allreduce(&unboundSize, &totalSize, 1, MPI_INT, MPI_SUM, world);
-
-    if (totalSize == 0)
-    {
-        unboundLocationsLocal = vector<long long int>();
-        unboundLevelsLocal = vector<long int>();
-        return;
-    }
-
-    if (unboundSize == 0)
-    {
-        unboundLocationsLocal.push_back(-1);
-        unboundLevelsLocal.push_back(-1);
-    }
-
-    plint j, q;
-    vector<long long int> unboundLocations;
-    vector<long int> unboundLevels;
-    vector<long long int> sendLocations;
-    vector<long int> sendLayers;
-
-    for (j = 0; j < numprocs; ++j)
-    {
-        if (procid == j)
-        {
-            PLB_ASSERT(unboundLocationsLocal.size() == unboundLevelsLocal.size());
-            unboundSize = unboundLocationsLocal.size();
-            sendLocations = unboundLocationsLocal;
-            sendLayers = unboundLevelsLocal;
-            unboundLocationsLocal = vector<long long int>();
-            unboundLevelsLocal = vector<long int>();
-        }
-        MPI_Bcast(&unboundSize, 1, MPI_INT, j, world);
-
-        sendLocations.resize(unboundSize);
-        sendLayers.resize(unboundSize);
-        MPI_Bcast(sendLocations.data(), unboundSize, MPI_LONG_LONG_INT, j, world);
-        MPI_Bcast(sendLayers.data(), unboundSize, MPI_LONG, j, world);
-
-        for (q = 0; q < unboundSize; ++q)
-        {
-            unboundLocations.push_back(sendLocations[q]);
-            unboundLevels.push_back(sendLayers[q]);
-        }
-    }
-
-    plint current;
-
-    platelet plt;
-
-    for (current = 0; current < plateletList.size(); ++current)
-    {
-        plt = plateletList[current];
-
-        bool flag = false;
-
-        if (plt.bound)
-        {
-            for (q = 0; q < unboundLocations.size(); ++q)
-            {
-                long long int loc = unboundLocations[q];
-                if (loc < 0)
-                {
-                    continue;
-                }
-                long long int px, py, pz;
-                px = loc / (ny * nz);
-                py = (loc / nz) % ny;
-                pz = loc % nz;
-                px = px - plt.center[0];
-                py = py - plt.center[1];
-                pz = pz - plt.center[2];
-                long long int dist = px * px + py * py + pz * pz;
-                long long int cutoff = (long long int)2 * diaFactor * diaFactor;
-                if (dist <= cutoff && plt.layer > unboundLevels[q])
-                {
-                    unboundLocationsLocal.push_back((long long int)ny * nz * plt.center[0] +
-                                                    (long long int)nz * plt.center[1] + (long long int)plt.center[2]);
-                    unboundLevelsLocal.push_back(plt.layer);
-                    flag = true;
-                    plt.unbound = true;
-                    break;
-                }
-            }
-        }
-
-        if (flag)
-        {
-            // Parallel routine needs the sum of all rate processes
-            for (j = 0; j < 6; ++j)
-            {
-                totalRate = totalRate - plt.motion[j];
-                plt.motion[j] = 0.;
-            }
-            totalRate = totalRate - plt.binding;
-
-            if (plt.unbinding < 0.5 * dblmax)
-            {
-                totalRate = totalRate - plt.unbinding;
-            }
-
-            plt.binding = 0.;
-            plt.unbinding = 0.;
-
-            for (j = 0; j < 8; ++j)
-            {
-                auto iT = eventList.find(event(current, j, plt.tau[j]));
-                if (iT != eventList.end())
-                {
-                    eventList.erase(iT);
-                }
-                plt.tau[j] = dblmax;
-            }
-
-            plateletList[current] = plt;
-        }
-    }
-
-    removeUnboundPlatelets();
-    return;
 }
 
 void iniKMCLattice()
