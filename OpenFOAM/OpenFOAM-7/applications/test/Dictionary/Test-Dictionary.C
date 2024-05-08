@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     | Website:  https://openfoam.org
-    \\  /    A nd           | Copyright (C) 2011-2018 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2019 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,179 +22,121 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
+    dictionaryTest
 
 Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "OSspecific.H"
-
-#include "scalar.H"
-
+#include "argList.H"
 #include "IOstreams.H"
-#include "Dictionary.H"
-#include "PtrDictionary.H"
+#include "IOobject.H"
+#include "IFstream.H"
+#include "dictionary.H"
+#include "stringOps.H"
 
 using namespace Foam;
-
-class ent
-:
-    public Dictionary<ent>::link
-{
-    word keyword_;
-    int i_;
-
-public:
-
-    ent(const word& keyword, int i)
-    :
-        keyword_(keyword),
-        i_(i)
-    {}
-
-    const word& keyword() const
-    {
-        return keyword_;
-    }
-
-    friend Ostream& operator<<(Ostream& os, const ent& e)
-    {
-        os  << e.keyword_ << ' ' << e.i_ << endl;
-        return os;
-    }
-};
-
-
-class Scalar
-{
-    scalar data_;
-
-public:
-
-    Scalar()
-    :
-        data_(0)
-    {}
-
-    Scalar(scalar val)
-    :
-        data_(val)
-    {}
-
-    ~Scalar()
-    {
-        Info<<"delete Scalar: " << data_ << endl;
-    }
-
-    friend Ostream& operator<<(Ostream& os, const Scalar& val)
-    {
-        os  << val.data_;
-        return os;
-    }
-};
-
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
 int main(int argc, char *argv[])
 {
-    Dictionary<ent>* dictPtr = new Dictionary<ent>;
-    Dictionary<ent>& dict = *dictPtr;
+    argList::noParallel();
+    argList::validArgs.insert("dict .. dictN");
+    argList args(argc, argv, false, true);
 
-    for (int i = 0; i<10; i++)
     {
-        ent* ePtr = new ent(word("ent") + name(i), i);
-        dict.append(ePtr->keyword(), ePtr);
-        dict.swapUp(ePtr);
+        dictionary dict;
+        dict.add("aaOPENMPIcc", 1);
+
+        string s("DDD${aa${WM_MPLIB}cc}EEE");
+        stringOps::inplaceExpand(s, dict, true, false);
+        Info<< "variable expansion:" << s << endl;
     }
 
-    Info<< dict << endl;
 
-    dict.swapDown(dict.first());
+    Info<< nl
+        << "FOAM_CASE=" << getEnv("FOAM_CASE") << nl
+        << "FOAM_CASENAME=" << getEnv("FOAM_CASENAME") << nl
+        << endl;
 
-    forAllConstIter(Dictionary<ent>, dict, iter)
+    if (args.size() <= 1)
     {
-        Info<< "element : " << *iter;
-    }
+        {
+            dictionary dict1(IFstream("testDict")());
+            Info<< "dict1: " << dict1 << nl
+                << "toc: " << dict1.toc() << nl
+                << "keys: " << dict1.keys() << nl
+                << "patterns: " << dict1.keys(true) << endl;
 
-    Info<< "keys: " << dict.toc() << endl;
+            dictionary dict2(move(dict1));
 
-    delete dictPtr;
+            Info<< "dict1.toc(): " << dict1.name() << " " << dict1.toc() << nl
+                << "dict2.toc(): " << dict2.name() << " " << dict2.toc()
+                << endl;
 
-    Dictionary<ent> dict2;
+            // copy back
+            dict1 = dict2;
+            Info<< "dict1.toc(): " << dict1.name() << " " << dict1.toc()
+                << endl;
 
-    for (int i = 0; i<10; i++)
-    {
-        ent* ePtr = new ent(word("ent") + name(i), i);
-        dict2.append(ePtr->keyword(), ePtr);
-        dict2.swapUp(ePtr);
-    }
+            dictionary dict3(dict2.subDictPtr("boundaryField"));
+            dictionary dict4(dict2.subDictPtr("NONEXISTENT"));
 
-    Info<< "dict:\n" << dict2 << endl;
-
-    Info<< nl << "Testing transfer: " << nl << endl;
-    Info<< "original: " << dict2 << endl;
-
-    Dictionary<ent> newDict;
-    newDict.transfer(dict2);
-
-    Info<< nl << "source: " << dict2 << nl
-        << "keys: " << dict2.toc() << nl
-        << "target: " << newDict << nl
-        << "keys: " << newDict.toc() << endl;
+            Info<< "dictionary construct from pointer" << nl
+                << "ok = " << dict3.name() << " " << dict3.toc() << nl
+                << "no = " << dict4.name() << " " << dict4.toc() << endl;
+        }
 
 
-    PtrDictionary<Scalar> scalarDict;
-    for (int i = 0; i<10; i++)
-    {
-        word key("ent" + name(i));
-        scalarDict.insert(key, new Scalar(1.3*i));
-    }
+        IOobject::writeDivider(Info);
 
-    Info<< nl << "scalarDict1: " << endl;
-    forAllConstIter(PtrDictionary<Scalar>, scalarDict, iter)
-    {
-        Info<< " = " << iter() << endl;
-    }
+        {
+            dictionary dict(IFstream("testDictRegex")());
+            dict.add(keyType("fooba[rz]", true), "anything");
 
-    PtrDictionary<Scalar> scalarDict2;
-    for (int i = 8; i<15; i++)
-    {
-        word key("ent" + name(i));
-        scalarDict2.insert(key, new Scalar(1.3*i));
-    }
-    Info<< nl << "scalarDict2: " << endl;
-    forAllConstIter(PtrDictionary<Scalar>, scalarDict2, iter)
-    {
-        Info<< "elem = " << *iter << endl;
-    }
+            Info<< "dict:" << dict << nl
+                << "toc: " << dict.toc() << nl
+                << "keys: " << dict.keys() << nl
+                << "patterns: " << dict.keys(true) << endl;
 
-    scalarDict.transfer(scalarDict2);
-
-
-    Scalar* p = scalarDict.lookupPtr("ent8");
-
-    // This does not (yet) work
-    // Scalar* q = scalarDict.remove("ent10");
-
-    if (p)
-    {
-        Info<< "found: " << *p << endl;
+            Info<< "Pattern find \"abc\" in top directory : "
+                << dict.lookup("abc") << endl;
+            Info<< "Pattern find \"abc\" in sub directory : "
+                << dict.subDict("someDict").lookup("abc")
+                    << endl;
+            Info<< "Recursive pattern find \"def\" in sub directory : "
+                << dict.subDict("someDict").lookup("def", true)
+                    << endl;
+            Info<< "Recursive pattern find \"foo\" in sub directory : "
+                << dict.subDict("someDict").lookup("foo", true)
+                    << endl;
+            Info<< "Recursive pattern find \"fooz\" in sub directory : "
+                << dict.subDict("someDict").lookup("fooz", true)
+                    << endl;
+            Info<< "Recursive pattern find \"bar\" in sub directory : "
+                << dict.subDict("someDict").lookup("bar", true)
+                    << endl;
+            Info<< "Recursive pattern find \"xxx\" in sub directory : "
+                << dict.subDict("someDict").lookup("xxx", true)
+                    << endl;
+        }
     }
     else
     {
-        Info<< "no p: " << endl;
+        IOobject::writeDivider(Info);
+        for (label argI=1; argI < args.size(); ++argI)
+        {
+            const string& dictFile = args[argI];
+            IFstream is(dictFile);
+
+            dictionary dict(is);
+
+            Info<< dict << endl;
+        }
     }
 
-    scalarDict.clear();
-
-    // Info<< " = " << *iter << endl;
-
-
-
-    Info<< nl << "Done." << endl;
     return 0;
 }
 

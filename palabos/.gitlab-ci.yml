@@ -1,0 +1,61 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_BASE_IMG: $CI_REGISTRY_IMAGE/plb-base-img:latest
+
+cache:
+    untracked: true
+    key: "$CI_PROJECT_ID"
+    paths:
+        - ${PWD}/ccache/
+
+stages:
+    - prepare_docker
+    - build_cmake
+    - deploy
+
+# Build and test stages are using a docker image containing package
+# needed to build and run a Palabos application.
+build_base_docker_img:
+  stage: prepare_docker
+  image: docker:latest
+  services:
+     - docker:dind
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker image pull $DOCKER_BASE_IMG || true
+    - cd docker
+    - docker build --tag $DOCKER_BASE_IMG .
+    - docker push $DOCKER_BASE_IMG
+
+## Test compilation with CMake, everything in examples & utility directory
+cmake:
+    stage: build_cmake
+    image: $DOCKER_BASE_IMG
+    before_script:
+        - mkdir -p ccache
+        - export CCACHE_BASEDIR=${PWD}
+        - export CCACHE_DIR=${PWD}/ccache
+        - ccache --set-config=compression=true
+        - ccache --set-config=max_size=500M
+    
+    script: 
+        - pwd
+        - cd build
+        - cmake ..
+        - make -j4
+
+pages:
+    stage: deploy
+    image: $DOCKER_BASE_IMG
+    script:
+        - pwd
+        - mkdir -p public/docs
+        - doxygen Doxyfile
+    artifacts:
+        paths:
+        - public
+    only:
+        - master
+
+

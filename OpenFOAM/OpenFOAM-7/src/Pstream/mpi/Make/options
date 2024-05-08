@@ -1,7 +1,7 @@
 -include $(GENERAL_RULES)/mplibType
 
 EXE_INC  = $(PFLAGS) $(PINC) \
-    -I/home/kaushik/mui \
-    -I/home/kaushik/mui/chrono_samplers \
-    -I/home/kaushik/mui/spatial_samplers 
+    -I/jet/home/kaushik7/mui \
+    -I/jet/home/kaushik7/mui/chrono_samplers \
+    -I/jet/home/kaushik7/mui/spatial_samplers 
 LIB_LIBS = $(PLIBS)

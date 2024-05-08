@@ -105,7 +105,7 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
     MPI_Comm world = mui::mpi_split_by_app(argc, argv);
 
     MPI_Comm_rank(world, &myGlobalRank);
-    /* 
+     
     MPI_Comm_split
     (
         world,
@@ -113,9 +113,8 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
         myGlobalRank,
         &PstreamGlobals::MPI_COMM_FOAM
     );
-    */
 
-   PstreamGlobals::MPI_COMM_FOAM = world;
+   //PstreamGlobals::MPI_COMM_FOAM = world;
 
     int numprocs;
     MPI_Comm_size(PstreamGlobals::MPI_COMM_FOAM, &numprocs);

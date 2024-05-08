@@ -1,0 +1,134 @@
+<?xml version="1.0" ?>
+
+<!-- All units are SI units, unless otherwise specificed -->
+
+<geometry>
+    <mesh> /jet/home/kaushik7/stenosisparsmall/./wall.stl </mesh>
+    <!-- Average inlet velocity in physical units (m/s). -->
+    <averageInletVelocity> 2.e-2 </averageInletVelocity>
+
+    <!-- The STL geometry provided by the user has openings (inlets and outlets).
+         It must not be provided by the user closed. -->
+    <openings>
+        <!-- 0 means x-direction, 1 means y-direction and 2 means z-direction. -->
+        <sortDirection> 2 </sortDirection>
+        <!-- According to the sortDirection, the user provides which openings are
+             inlets and which are outlets. -->
+        <type> Inlet Outlet </type>
+    </openings>
+
+    <!-- Physical coordinates of the inlet and outlet centers -->
+    <inlet>
+        <x> 0. </x>
+        <y> 0. </y>
+        <z> 0. </z>
+    </inlet>
+
+    <outlet>
+        <x> 0. </x>
+        <y> 0. </y>
+        <z> 1.e-3 </z>
+    </outlet>
+
+    <dimensions>
+        <diameter> 1.2e-4 </diameter>
+	    <lz> 1.e-3 </lz>
+    </dimensions>
+
+</geometry>
+
+<!-- All fluid properties are given in physical units. -->
+<fluid>
+    <kinematicViscosity> 3e-06 </kinematicViscosity>
+    <density> 1000 </density>
+</fluid>
+
+<!-- KMC simulation parameters -->
+<kmc>
+    <!-- Initial number of platelets to be placed inside the simulation domain -->
+    <numPlatelets> 1400 </numPlatelets>
+    <!-- Base rate of platelet attachment to collagen -->
+    <collagenAttach> 250. </collagenAttach>
+    <!-- Base rate of platelet detachment from collagen -->
+    <collagenDetach> 1.e-4 </collagenDetach>
+    <!-- Base rate of platelet detachment to another platelet -->
+    <fibAttach> 12.5 </fibAttach>
+    <!-- Base rate of platelet detachment from another platelet -->
+    <fibDetach> 1.e-4 </fibDetach>
+    <!-- Characteristic shear rate used in the exponential function for estimating
+            platelet detachment rates-->
+    <gammac> 200 </gammac>
+    <!-- PLatelet dispersion coefficient -->
+    <diffusivity> 1.25e-11 </diffusivity>
+</kmc>
+
+<!-- NN parameters (only F(xi) estimation parameters and EC50s)-->
+<!-- Other NN matrix parameters included in a separate file-->
+<nn>
+    <!-- Neural network weights and biases input file -->
+    <net> /jet/home/kaushik7/nninput/nn_input_3.xml </net>
+    <!-- Donor ID for donor specific simulation -->
+    <donorid> B </donorid>
+    <!-- Half-saturation concentration: hill function -->
+    <xi50> 0.009 </xi50>
+    <!-- Hill function sharpness of response -->
+    <nHill> 0.75 </nHill>
+    <!-- Alpha parameter in F(xi) -->
+    <alpha> 0.001 </alpha>
+    <!-- EC50 of agonists -->
+    <ec50>
+        <adp> 1.e-3 </adp>
+        <cvx> 2.e-6 </cvx>
+        <thrombin> 2.e5 </thrombin>
+        <u46619> 6.7e-5 </u46619>
+    </ec50>
+    <!-- Relative potency of TXA2/U46619 -->
+    <theta> 15. </theta>
+    <!-- Flag for iloprost treatment -->
+    <iloprostflag> False </iloprostflag>
+    <!-- Flag for GSNO treatment -->
+    <gsnoflag> False </gsnoflag>
+</nn>
+
+<thrombin> /jet/home/kaushik7/thrombin_conc.xml </thrombin>
+
+<numerics>
+    <!-- The referenceDirection is used for the resolution.
+         0 means x-direction, 1 means y-direction and 2 means z-direction. -->
+    <referenceDirection> 2 </referenceDirection>
+    <!-- Reference length in the direction specified above -->
+    <referenceLength> 1.e-3 </referenceLength>
+    <!-- KMC grid spacing -->
+    <hLKMC> 1.5e-6 </hLKMC>
+    <!-- LB grid spacing -->
+    <hLB> 3.e-6 </hLB> 
+    <!-- LB time step -->
+    <dt> 1.e-7 </dt>
+</numerics>
+
+<simulation>
+
+    <!-- Tolerance for LB steady state convergence check -->
+    <epsilon>  1.e-1  </epsilon>
+    <!-- A flag to decide whether or not to display details of fluid cells -->
+    <performOutput>      True   </performOutput>
+    <!-- Use an incompressible BGK model or the standard BGK model. -->
+    <useIncompressible>  True   </useIncompressible>
+    <!-- Use Poiseuille profile as an inflow boundary condition, or use
+         a simple plug profile instead. -->
+    <poiseuilleInlet>    True   </poiseuilleInlet>
+    <convectiveScaling>  False  </convectiveScaling>
+    <!-- Constant flow or pressure relief mode -->
+    <constantFlow>  True  </constantFlow>
+</simulation>
+
+<checkpoint>
+    <!-- Load previously saved simulation from a checkpoint -->
+    <flag>  False  </flag>
+    <!-- Time of the checkpoint -->
+    <time> 120. </time>
+    <!-- Numprocs used in the previous simulation -->
+    <numprocs> 1 </numprocs>
+</checkpoint>
+
+
