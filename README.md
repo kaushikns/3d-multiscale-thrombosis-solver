@@ -7,3 +7,6 @@ Thrombus growth model decribed in the publications:
 ## Repo Under Development
 
 This repository is currently under active development. Changes and updates are in progress. Please check back later for the latest updates.
+
+To do: 1. Instructions for compiling and running the code
+2. Add link to data in support of publications
