@@ -25,7 +25,7 @@ To run the example, `cd` to `case` and run:
 ````mpirun -np n1 pkmcnn-palabos-openfoam/pkmcnnlb : -np n2 agonistTransportDyMFoam #-parallel ````
 
 #### Output 
-The simulations output *.csv files that contain platelet locations and activation levels after different time intervals, *.vti files that velocity profiles, and 'time' directories containing agonist concentration field data. These outputs can all be visualized using Paraview. 
+The simulations output *.csv files that contain platelet locations and activation levels after different time intervals, *.vti files that have velocity profiles, and 'time' directories containing agonist concentration field data. These outputs can all be visualized using Paraview. 
 
 #### Note
 Ensure all dependencies are properly configured and paths are updated before compiling and running. For any further assistance or inquiries, please contact me.
