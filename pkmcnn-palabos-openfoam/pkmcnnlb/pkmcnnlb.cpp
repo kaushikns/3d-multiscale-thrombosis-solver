@@ -4282,8 +4282,6 @@ void runKMC()
     plint current;
     plint j;
 
-    MPI_Barrier(world);
-
     global::timer("commtime").restart();
 
     if (numprocs > 1)
