@@ -5360,16 +5360,6 @@ void runLB(plint level, MultiBlockLattice3D<T, DESCRIPTOR> *iniVal)
     inletP = computeMax(*computeDensity(*lattice, inletDomain), inletDomain);
     outletP = 1.;
 
-    inletPs[iter % inletPs.size()] = inletP;
-    T averageinletP = 0.;
-    for (int m = 0; m < inletPs.size(); ++m)
-    {
-        averageinletP += inletPs[m];
-    }
-    averageinletP /= inletPs.size();
-
-    averageInletVelocityComputed = uAveLB * (1 - (inletP - outletP) / deltaPTotal);
-
     LB.assign(lattice);
 
     if (iter - iter_checkpoint == 0)
