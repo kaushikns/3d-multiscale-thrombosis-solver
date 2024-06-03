@@ -407,49 +407,46 @@ std::array<double, 3> interpolateVelocity(double px, double py, double pz)
     velocity[0] = 0.;
     velocity[1] = 0.;
     velocity[2] = 0.;
-    if (flagMatrixInside.get((long int)px, (long int)py, (long int)pz))
+    long int x0, y0, z0, x1, y1, z1;
+    x0 = (long int)floor(px);
+    y0 = (long int)floor(py);
+    z0 = (long int)floor(pz);
+    x1 = x0 + 1;
+    y1 = y0 + 1;
+    z1 = z0 + 1;
+    double xd, yd, zd;
+    xd = px - (double)x0;
+    yd = py - (double)y0;
+    zd = pz - (double)z0;
+
+    auto v000 = readVelocity(x0, y0, z0);
+    auto v001 = readVelocity(x0, y0, z1);
+    auto v010 = readVelocity(x0, y1, z0);
+    auto v011 = readVelocity(x0, y1, z1);
+    auto v100 = readVelocity(x1, y0, z0);
+    auto v101 = readVelocity(x1, y0, z1);
+    auto v110 = readVelocity(x1, y1, z0);
+    auto v111 = readVelocity(x1, y1, z1);
+
+    std::array<double, 3> v00, v01, v10, v11, v0, v1;
+
+    for (int i = 0; i < 3; ++i)
     {
-        long int x0, y0, z0, x1, y1, z1;
-        x0 = (long int)floor(px);
-        y0 = (long int)floor(py);
-        z0 = (long int)floor(pz);
-        x1 = x0 + 1;
-        y1 = y0 + 1;
-        z1 = z0 + 1;
-        double xd, yd, zd;
-        xd = px - (double)x0;
-        yd = py - (double)y0;
-        zd = pz - (double)z0;
+        v00[i] = (1. - xd) * v000[i] + xd * v100[i];
+        v01[i] = (1. - xd) * v001[i] + xd * v101[i];
+        v10[i] = (1. - xd) * v010[i] + xd * v110[i];
+        v11[i] = (1. - xd) * v011[i] + xd * v111[i];
+    }
 
-        auto v000 = readVelocity(x0, y0, z0);
-        auto v001 = readVelocity(x0, y0, z1);
-        auto v010 = readVelocity(x0, y1, z0);
-        auto v011 = readVelocity(x0, y1, z1);
-        auto v100 = readVelocity(x1, y0, z0);
-        auto v101 = readVelocity(x1, y0, z1);
-        auto v110 = readVelocity(x1, y1, z0);
-        auto v111 = readVelocity(x1, y1, z1);
+    for (int i = 0; i < 3; ++i)
+    {
+        v0[i] = (1. - yd) * v00[i] + yd * v10[i];
+        v1[i] = (1. - yd) * v01[i] + yd * v11[i];
+    }
 
-        std::array<double, 3> v00, v01, v10, v11, v0, v1;
-
-        for (int i = 0; i < 3; ++i)
-        {
-            v00[i] = (1. - xd) * v000[i] + xd * v100[i];
-            v01[i] = (1. - xd) * v001[i] + xd * v101[i];
-            v10[i] = (1. - xd) * v010[i] + xd * v110[i];
-            v11[i] = (1. - xd) * v011[i] + xd * v111[i];
-        }
-
-        for (int i = 0; i < 3; ++i)
-        {
-            v0[i] = (1. - yd) * v00[i] + yd * v10[i];
-            v1[i] = (1. - yd) * v01[i] + yd * v11[i];
-        }
-
-        for (int i = 0; i < 3; ++i)
-        {
-            velocity[i] = (dx / dt) * ((1. - zd) * v0[i] + zd * v1[i]);
-        }
+    for (int i = 0; i < 3; ++i)
+    {
+        velocity[i] = (dx / dt) * ((1. - zd) * v0[i] + zd * v1[i]);
     }
 
     return velocity;
