@@ -1719,7 +1719,7 @@ list<plint> checkOverlap(plint current, plint dir)
     py = plt.center[1];
     pz = plt.center[2];
 
-    plt.center[dir / 2] = plt.center[dir / 2] + (plint)pow(-1, dir);
+    plt.center[dir / 2] = plt.center[dir / 2] + (dir % 2 == 0 ? 1 : -1);
 
     plint cx, cy, cz;
     cx = plt.center[0];
@@ -1781,7 +1781,7 @@ list<T> checkOverlapSimple(plint current, plint dir)
     py = plt.center[1];
     pz = plt.center[2];
 
-    plt.center[dir / 2] = plt.center[dir / 2] + (plint)pow(-1, dir);
+    plt.center[dir / 2] = plt.center[dir / 2] + (dir % 2 == 0 ? 1 : -1);
 
     plint cx, cy, cz;
     cx = plt.center[0];
@@ -2208,7 +2208,7 @@ void passForward(plint current, plint dir)
 
         obtainVelocity(cx, cy, cz); // Get velocity from LB
 
-        tempPlt.convection[dir] = max(0., pow(-1, dir) * velocity[dir / 2] / h) + motionTransfer;
+        tempPlt.convection[dir] = max(0., (dir % 2 == 0 ? 1 : -1) * velocity[dir / 2] / h) + motionTransfer;
         plateletList[temp] = tempPlt;
 
         if (!tempPlt.bound)
@@ -2244,13 +2244,13 @@ void passForwardMotion(plint current, plint dir)
             continue;
 
         // Move the platelet backwards away from the direction of motion
-        currentPlt.center[dir / 2] = currentPlt.center[dir / 2] - (plint)pow(-1, dir);
+        currentPlt.center[dir / 2] = currentPlt.center[dir / 2] - (dir % 2 == 0 ? 1 : -1);
 
         plateletList[current] = currentPlt;
 
         auto overlapLinks = checkOverlap(current, i);
 
-        currentPlt.center[dir / 2] = currentPlt.center[dir / 2] + (plint)pow(-1, dir);
+        currentPlt.center[dir / 2] = currentPlt.center[dir / 2] + (dir % 2 == 0 ? 1 : -1);
 
         plateletList[current] = currentPlt;
 
@@ -2289,7 +2289,7 @@ void passForwardMotion(plint current, plint dir)
                     }
 
                     obtainVelocity(tempPlt.center[0], tempPlt.center[1], tempPlt.center[2]);
-                    tempPlt.convection[i] = max(0., pow(-1, i) * velocity[i / 2] / h);
+                    tempPlt.convection[i] = max(0., (i % 2 == 0 ? 1 : -1) * velocity[i / 2] / h);
                     T motionRate = diffusion + tempPlt.convection[i];
 
                     if (oldRate != motionRate)
@@ -2922,7 +2922,7 @@ void setRates(plint current, plint type)
         obtainVelocity(plt.center[0], plt.center[1], plt.center[2]); // Get velocity from LB
         for (j = 0; j < 6; ++j)
         {
-            plt.convection[j] = max(0., pow(-1, j) * velocity[j / 2]) / h;
+            plt.convection[j] = max(0., (j % 2 == 0 ? 1 : -1) * velocity[j / 2]) / h;
             plt.motion[j] = diffusion + plt.convection[j];
 
             auto iT = eventList.find(event(current, j, plt.tau[j]));
@@ -3029,7 +3029,7 @@ void setRates(plint current, plint type)
         obtainVelocity(plt.center[0], plt.center[1], plt.center[2]); // Get velocity from LB
         for (j = 0; j < 6; ++j)
         {
-            plt.convection[j] = max(0., pow(-1, j) * velocity[j / 2]) / h;
+            plt.convection[j] = max(0., (j % 2 == 0 ? 1 : -1) * velocity[j / 2]) / h;
             plt.motion[j] = diffusion + plt.convection[j];
 
             plt.tau[j] = dblmax;
@@ -3078,7 +3078,7 @@ void setRates(plint current, plint type)
 
             for (j = 0; j < 6; ++j)
             {
-                plt.convection[j] = max(0., pow(-1, j) * velocity[j / 2]) / h;
+                plt.convection[j] = max(0., (j % 2 == 0 ? 1 : -1) * velocity[j / 2]) / h;
                 plt.motion[j] = diffusion + plt.convection[j];
                 plt.tau[j] = dblmax;
                 plateletList[current] = plt;
@@ -3191,7 +3191,7 @@ void setRates()
 
             for (j = 0; j < 6; ++j)
             {
-                plt.convection[j] = max(0., pow(-1, j) * velocity[j / 2]) / h;
+                plt.convection[j] = max(0., (j % 2 == 0 ? 1 : -1) * velocity[j / 2]) / h;
                 plt.motion[j] = diffusion + plt.convection[j];
                 T dtau = totalTimeNRM - log(randn()) / plt.motion[j];
                 plt.tau[j] = dtau;
@@ -3408,7 +3408,7 @@ void updateEventList()
 
             for (int j = 0; j < 6; ++j)
             {
-                plt.convection[j] = max(0., pow(-1, j) * velocity[j / 2]) / h;
+                plt.convection[j] = max(0., (j % 2 == 0 ? 1 : -1) * velocity[j / 2]) / h;
                 plt.motion[j] = diffusion + plt.convection[j];
                 T dtau = totalTimeNRM - log(randn()) / plt.motion[j];
                 plt.tau[j] = dtau;
@@ -4121,7 +4121,7 @@ void updateBoundPlateletMap()
         {
             long long int center[3] = {cplt.loc / (ny * nz), (cplt.loc / nz) % ny, cplt.loc % nz};
 
-            center[cplt.type / 2] = center[cplt.type / 2] - pow(-1, cplt.type / 2);
+            center[cplt.type / 2] = center[cplt.type / 2] - (cplt.type % 2 == 0 ? 1 : -1);
 
             auto iT = occupationGlobal.find((long long int)ny * nz * center[0] +
                                             (long long int)nz * center[1] + (long long int)center[2]);
@@ -4470,7 +4470,7 @@ void runKMC()
             }
         }
 
-        plt.center[j / 2] = plt.center[j / 2] + (plint)pow(-1, j);
+        plt.center[j / 2] = plt.center[j / 2] + (j % 2 == 0 ? 1 : -1);
         plt.lastMotionType = j;
 
         std::pair<long long int, plint> pltPair(
@@ -4728,7 +4728,7 @@ void runKMCOld()
             }
         }
 
-        plt.center[j / 2] = plt.center[j / 2] + (plint)pow(-1, j);
+        plt.center[j / 2] = plt.center[j / 2] + (j % 2 == 0 ? 1 : -1);
         plt.lastMotionType = j;
 
         std::pair<long long int, plint> pltPair(
