@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
             {
                 Foam::point p(plts[i].px, plts[i].py, plts[i].pz);
 
-                label celli = ms.findNearestCell(p, 0, true);
+                label celli = ms.findNearestCell(p, -1, true);
 
                 double px = mesh.C()[celli].x() - plts[i].px;
                 double py = mesh.C()[celli].y() - plts[i].py;
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
                 if (currentTime >= plts[i].release && plts[i].release > 0.)
                 {
                     Foam::point p(plts[i].px, plts[i].py, plts[i].pz);
-                    label celli = ms_.findNearestCell(p, 0, true);
+                    label celli = ms_.findNearestCell(p, -1, true);
 
                     if (mesh.V()[celli] < 1.e-21)
                     {
